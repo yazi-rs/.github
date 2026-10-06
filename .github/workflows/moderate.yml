@@ -1,0 +1,29 @@
+name: Moderate
+
+on:
+  workflow_call:
+
+concurrency:
+  group: moderate-${{ github.repository }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  moderate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          repository: yazi-rs/.github
+          ref: main
+          path: .yazi-org
+
+      - uses: actions/github-script@v9
+        with:
+          script: |
+            const moderate = require('./.yazi-org/scripts/moderate/main.js')
+            await moderate({github, context, core})

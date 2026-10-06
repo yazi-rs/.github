@@ -1,0 +1,37 @@
+name: Validate Issue
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          repository: yazi-rs/.github
+          ref: main
+          path: .yazi-org
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: |
+          cd .yazi-org/scripts/validate-form
+          npm ci
+
+      - name: Validate Issue
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const script = require('./.yazi-org/scripts/validate-form/main.js')
+            await script({github, context, core})
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
